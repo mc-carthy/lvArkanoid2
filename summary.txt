@@ -1,0 +1,6 @@
+# Arkanoid game
+
+##
+* Add ball, platform and brick objects
+* Update their positions when necessary
+* Draw them to the screen
