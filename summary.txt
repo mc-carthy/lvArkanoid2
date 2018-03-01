@@ -4,3 +4,7 @@
 * Add ball, platform and brick objects
 * Update their positions when necessary
 * Draw them to the screen
+
+##
+* Extract ball, platform & bricks draw/update functions
+* Create a table to hold the bricks, as well as functions to create, update and draw bricks
