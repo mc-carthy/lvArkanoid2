@@ -12,3 +12,6 @@
 ##
 * Create a function to loop through and create an array of bricks to be created on load
 * Create table of walls surrounding the screen and draw them
+
+##
+* Create collisions detection functions for ball-platform, ball-walls, ball-bricks, platform-walls collisions using AABB
