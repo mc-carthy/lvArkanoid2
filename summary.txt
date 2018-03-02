@@ -8,3 +8,7 @@
 ##
 * Extract ball, platform & bricks draw/update functions
 * Create a table to hold the bricks, as well as functions to create, update and draw bricks
+
+##
+* Create a function to loop through and create an array of bricks to be created on load
+* Create table of walls surrounding the screen and draw them
