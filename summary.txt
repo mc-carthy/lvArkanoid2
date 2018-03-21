@@ -15,3 +15,6 @@
 
 ##
 * Create collisions detection functions for ball-platform, ball-walls, ball-bricks, platform-walls collisions using AABB
+
+##
+* Add collision response for ball-wall, ball-bricks, ball-platform and platform-wall collisions
