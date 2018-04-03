@@ -29,9 +29,34 @@ walls.current_level_walls = {}
 
 local collisions = {}
 
+local levels = {}
+levels.sequence = {}
+levels.current_level = 1
+levels.sequence[1] = {
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1 },
+    { 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0 },
+    { 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0 },
+    { 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+}
+
+levels.sequence[2] = {
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0 },
+    { 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0 },
+    { 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0 },
+    { 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+}
+
 
 function love.load()
-    bricks.construct_level()
+    bricks.construct_level(levels.sequence[levels.current_level])
     walls.construct_walls()
 end
 
@@ -41,6 +66,7 @@ function love.update(dt)
     bricks.update(dt)
     walls.update(dt)
     collisions.resolve_collisions(dt)
+    levels.switch_to_next_level(bricks)
 end
 
 function love.draw()
@@ -48,6 +74,9 @@ function love.draw()
     platform.draw()
     bricks.draw()
     walls.draw()
+    if levels.gamefinished then
+        love.graphics.printf("Congratulations!\n" .. "You have finished the game!", 300, 250, 200, "center")
+    end
 end
 
 function love.keypressed(key)
@@ -69,6 +98,11 @@ function ball.rebound(shift_ball_x, shift_ball_y)
     if shift_ball_y ~= 0 then
         ball.speed_y = -ball.speed_y
     end
+end
+
+function ball.reposition()
+    ball.position_x = 300
+    ball.position_y = 300
 end
 
 function ball.update(dt)
@@ -98,13 +132,16 @@ function platform.draw()
     love.graphics.rectangle("line", platform.position_x, platform.position_y, platform.width, platform.height)
 end
 
-function bricks.construct_level()
-    for row = 1, bricks.rows do
-        for col = 1, bricks.columns do
-            local new_brick_position_x = bricks.top_left_position_x + (col - 1) * (bricks.brick_width + bricks.horizontal_distance)
-            local new_brick_position_y = bricks.top_left_position_y + (row - 1) * (bricks.brick_height + bricks.vertical_distance)
-            local new_brick = bricks.new_brick(new_brick_position_x, new_brick_position_y)
-            bricks.add_to_current_level_bricks(new_brick)
+function bricks.construct_level(level_bricks_arrangement)
+    bricks.no_more_bricks = false
+    for rowIndex, row in ipairs(level_bricks_arrangement) do
+        for colIndex, bricktype in ipairs(row) do
+            if bricktype == 1 then
+                local new_brick_position_x = bricks.top_left_position_x + (colIndex - 1) * (bricks.brick_width + bricks.horizontal_distance)
+                local new_brick_position_y = bricks.top_left_position_y + (rowIndex - 1) * (bricks.brick_height + bricks.vertical_distance)
+                local new_brick = bricks.new_brick(new_brick_position_x, new_brick_position_y)
+                bricks.add_to_current_level_bricks(new_brick)
+            end
         end
     end
 end
@@ -135,8 +172,12 @@ function bricks.draw_brick(single_brick)
 end
 
 function bricks.update()
-    for _, brick in pairs(bricks.current_level_bricks) do
-        bricks.update_brick(brick)
+    if #bricks.current_level_bricks <= 0 then
+        bricks.no_more_bricks = true
+    else
+        for _, brick in pairs(bricks.current_level_bricks) do
+            bricks.update_brick(brick)
+        end
     end
 end
 
@@ -320,4 +361,16 @@ function collisions.resolve_collisions()
     collisions.ball_walls_collision(ball, walls)
     collisions.ball_bricks_collision(ball, bricks)
     collisions.platform_walls_collision(platform, walls)
+end
+
+function levels.switch_to_next_level(bricks)
+    if bricks.no_more_bricks then
+        if levels.current_level < #levels.sequence then
+            levels.current_level = levels.current_level + 1
+            bricks.construct_level(levels.sequence[levels.current_level])
+            ball.reposition()
+        else
+            levels.gamefinished = true
+        end
+    end
 end
