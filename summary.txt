@@ -22,3 +22,6 @@
 ##
 # Create level specific arrangements for bricks
 # Add level switching mechanic when all level's bricks have been destroyed
+
+##
+# Store levels as strings made from rows & columns as opposed to tables for ease of creation/maintenance

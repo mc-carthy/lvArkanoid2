@@ -53,10 +53,32 @@ levels.sequence[2] = {
     { 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 }
+levels.stringSequence = {}
+levels.stringSequence[1] = [[
+___________
+
+# # ### # #
+# # #   # #
+### ##   # 
+# # #    # 
+# # ###  # 
+___________
+]]
+
+levels.stringSequence[2] = [[
+___________
+
+##  # # ###
+# # # # #  
+###  #  ## 
+# #  #  #  
+###  #  ###
+___________
+]]
 
 
 function love.load()
-    bricks.construct_level(levels.sequence[levels.current_level])
+    bricks.construct_level_from_string(levels.stringSequence[levels.current_level])
     walls.construct_walls()
 end
 
@@ -137,6 +159,24 @@ function bricks.construct_level(level_bricks_arrangement)
     for rowIndex, row in ipairs(level_bricks_arrangement) do
         for colIndex, bricktype in ipairs(row) do
             if bricktype == 1 then
+                local new_brick_position_x = bricks.top_left_position_x + (colIndex - 1) * (bricks.brick_width + bricks.horizontal_distance)
+                local new_brick_position_y = bricks.top_left_position_y + (rowIndex - 1) * (bricks.brick_height + bricks.vertical_distance)
+                local new_brick = bricks.new_brick(new_brick_position_x, new_brick_position_y)
+                bricks.add_to_current_level_bricks(new_brick)
+            end
+        end
+    end
+end
+
+function bricks.construct_level_from_string(level_bricks_arrangement)
+    bricks.no_more_bricks = false
+    local rowIndex = 0
+    for row in level_bricks_arrangement:gmatch('(.-)\n') do
+        rowIndex = rowIndex + 1
+        local colIndex = 0
+        for bricktype in row:gmatch('.') do
+            colIndex = colIndex + 1
+            if bricktype == '#' then
                 local new_brick_position_x = bricks.top_left_position_x + (colIndex - 1) * (bricks.brick_width + bricks.horizontal_distance)
                 local new_brick_position_y = bricks.top_left_position_y + (rowIndex - 1) * (bricks.brick_height + bricks.vertical_distance)
                 local new_brick = bricks.new_brick(new_brick_position_x, new_brick_position_y)
@@ -367,7 +407,7 @@ function levels.switch_to_next_level(bricks)
     if bricks.no_more_bricks then
         if levels.current_level < #levels.sequence then
             levels.current_level = levels.current_level + 1
-            bricks.construct_level(levels.sequence[levels.current_level])
+            bricks.construct_level_from_string(levels.stringSequence[levels.current_level])
             ball.reposition()
         else
             levels.gamefinished = true
